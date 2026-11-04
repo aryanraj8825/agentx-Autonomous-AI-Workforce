@@ -1,0 +1,168 @@
+/**
+ * The seven AgentX agents. Each agent has its own tools, permissions, inputs and
+ * outputs — they are workers with distinct responsibilities, not chatbot personas.
+ * `perm`: read | write | exec | approve  (approve = needs human sign-off)
+ */
+export const AGENTS = {
+  supervisor: {
+    id: 'supervisor',
+    name: 'Supervisor',
+    role: 'Orchestrator',
+    icon: 'Network',
+    summary: 'Interprets the goal, routes work to agents, tracks dependencies and assembles the final deliverable.',
+    responsibilities: [
+      'Interpret the user objective',
+      'Select agents for the job',
+      'Track progress and dependencies',
+      'Combine approved outputs',
+    ],
+    tools: [
+      { name: 'workflow_state.read', perm: 'read' },
+      { name: 'workflow_state.write', perm: 'write' },
+      { name: 'agent.dispatch', perm: 'exec' },
+    ],
+    inputs: ['User goal', 'Agent results', 'Reviewer verdict'],
+    outputs: ['Task routing', 'Final deliverable bundle'],
+    model: 'gemini-2.5-pro',
+    temperature: 0.2,
+    maxRetries: 2,
+  },
+  planner: {
+    id: 'planner',
+    name: 'Planner',
+    role: 'Planning agent',
+    icon: 'ListTree',
+    summary: 'Breaks a goal into subtasks, finds dependencies and orders them into an executable workflow.',
+    responsibilities: [
+      'Decompose goals into subtasks',
+      'Identify task dependencies',
+      'Set execution priorities',
+      'Mark steps that can run in parallel',
+    ],
+    tools: [
+      { name: 'memory.search', perm: 'read' },
+      { name: 'workflow.compile', perm: 'write' },
+    ],
+    inputs: ['Interpreted objective', 'Relevant past plans'],
+    outputs: ['Dependency graph (DAG)', 'Priority estimates'],
+    model: 'gemini-2.5-pro',
+    temperature: 0.3,
+    maxRetries: 2,
+  },
+  researcher: {
+    id: 'researcher',
+    name: 'Researcher',
+    role: 'Research agent',
+    icon: 'Search',
+    summary: 'Searches the web and documents, extracts facts and keeps the source for every claim.',
+    responsibilities: [
+      'Search the web and document stores',
+      'Extract facts with sources',
+      'Drop irrelevant results',
+      'Return structured findings',
+    ],
+    tools: [
+      { name: 'web.search', perm: 'read' },
+      { name: 'web.fetch', perm: 'read' },
+      { name: 'documents.retrieve', perm: 'read' },
+    ],
+    inputs: ['Research subtask', 'Search constraints'],
+    outputs: ['Findings with source URLs', 'Evidence records'],
+    model: 'gemini-2.5-flash',
+    temperature: 0.4,
+    maxRetries: 3,
+  },
+  analyst: {
+    id: 'analyst',
+    name: 'Analyst',
+    role: 'Data analyst agent',
+    icon: 'BarChart3',
+    summary: 'Compares findings, calculates statistics and turns raw facts into patterns and charts.',
+    responsibilities: [
+      'Compare entities and options',
+      'Calculate statistics',
+      'Spot trends and gaps',
+      'Produce charts and insights',
+    ],
+    tools: [
+      { name: 'python.sandbox', perm: 'exec' },
+      { name: 'dataframe.query', perm: 'read' },
+    ],
+    inputs: ['Research findings'],
+    outputs: ['Comparison tables', 'Insights', 'Chart specs'],
+    model: 'gemini-2.5-pro',
+    temperature: 0.1,
+    maxRetries: 2,
+  },
+  executor: {
+    id: 'executor',
+    name: 'Executor',
+    role: 'Execution agent',
+    icon: 'TerminalSquare',
+    summary: 'Runs approved actions: generates files, calls external APIs and executes code in a sandbox.',
+    responsibilities: [
+      'Generate CSV, XLSX and PDF files',
+      'Call authorised external APIs',
+      'Run sandboxed Python',
+      'Pause for approval on consequential actions',
+    ],
+    tools: [
+      { name: 'files.generate', perm: 'write' },
+      { name: 'python.sandbox', perm: 'exec' },
+      { name: 'integrations.call', perm: 'approve' },
+    ],
+    inputs: ['Analyst output', 'Approved action list'],
+    outputs: ['CSV / XLSX / PDF files', 'Action receipts'],
+    model: 'gemini-2.5-flash',
+    temperature: 0,
+    maxRetries: 3,
+  },
+  writer: {
+    id: 'writer',
+    name: 'Writer',
+    role: 'Writer agent',
+    icon: 'PenLine',
+    summary: 'Turns findings into a structured, professional document with an executive summary.',
+    responsibilities: [
+      'Draft reports and summaries',
+      'Structure the final deliverable',
+      'Cite every claim',
+      'Apply reviewer revisions',
+    ],
+    tools: [
+      { name: 'document.compose', perm: 'write' },
+      { name: 'citations.resolve', perm: 'read' },
+    ],
+    inputs: ['Analysis', 'Evidence records', 'Reviewer feedback'],
+    outputs: ['Report draft', 'Executive summary'],
+    model: 'gemini-2.5-pro',
+    temperature: 0.6,
+    maxRetries: 2,
+  },
+  reviewer: {
+    id: 'reviewer',
+    name: 'Reviewer',
+    role: 'Quality assurance agent',
+    icon: 'ShieldCheck',
+    summary: 'Checks facts, citations and completeness, and sends work back when it does not hold up.',
+    responsibilities: [
+      'Check factual consistency',
+      'Find unsupported claims',
+      'Score output quality',
+      'Request revisions from the right agent',
+    ],
+    tools: [
+      { name: 'evidence.verify', perm: 'read' },
+      { name: 'agent.request_revision', perm: 'write' },
+    ],
+    inputs: ['Draft', 'Evidence records', 'Generated files'],
+    outputs: ['Verdict', 'Revision requests'],
+    model: 'gemini-2.5-pro',
+    temperature: 0,
+    maxRetries: 1,
+  },
+};
+
+export const AGENT_LIST = Object.values(AGENTS);
+export const agentColor = (id, alpha) =>
+  alpha == null ? `rgb(var(--a-${id}))` : `rgb(var(--a-${id}) / ${alpha})`;

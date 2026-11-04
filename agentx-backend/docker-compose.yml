@@ -1,0 +1,41 @@
+# Full stack: API + Celery worker + MongoDB + Qdrant + Redis.
+#   cp .env.example .env   (set JWT_SECRET, SECRET_KEY, GEMINI_API_KEY)
+#   docker compose up --build
+x-app: &app
+  build: .
+  env_file: .env
+  environment: &env
+    APP_ENV: ${APP_ENV:-development}
+    MONGO_URL: mongodb://mongo:27017
+    QDRANT_URL: http://qdrant:6333
+    REDIS_URL: redis://redis:6379/0
+    RUN_MODE: celery
+    FILES_DIR: /data/files
+  volumes: [files:/data/files]
+  depends_on: [mongo, qdrant, redis]
+
+services:
+  api:
+    <<: *app
+    ports: ["8000:8000"]
+  worker:
+    <<: *app
+    command: celery -A app.worker.celery_app worker -l info --concurrency 2
+    # The analyst's sandbox runs here. For stronger isolation of model-written code, run workers with
+    # `network_mode: none` (then they cannot reach Gemini either: use a dedicated sandbox worker) or gVisor.
+    read_only: true
+    tmpfs: [/tmp]
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+  mongo:
+    image: mongo:7
+    volumes: [mongo:/data/db]
+  qdrant:
+    image: qdrant/qdrant:latest
+    volumes: [qdrant:/qdrant/storage]
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes: [redis:/data]
+
+volumes: {files: {}, mongo: {}, qdrant: {}, redis: {}}

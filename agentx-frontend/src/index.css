@@ -1,0 +1,116 @@
+@import '@fontsource-variable/geist';
+@import '@fontsource-variable/geist-mono';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ------------------------------------------------------------------
+   Design tokens. Values are space-separated RGB so Tailwind can apply
+   alpha (bg-accent/20). Dark is the default "operations room" theme.
+------------------------------------------------------------------- */
+:root,
+[data-theme='dark'] {
+  --bg: 11 12 15;
+  --surface: 18 20 25;
+  --raised: 26 29 36;
+  --line: 40 44 53;
+  --line-strong: 62 68 80;
+  --fg: 236 238 242;
+  --muted: 148 155 168;
+  --faint: 98 105 118;
+  --accent: 198 244 50;
+  --accent-ink: 17 20 8;
+  --accent-text: 198 244 50;
+  --ok: 74 222 128;
+  --warn: 251 191 36;
+  --bad: 248 113 113;
+  --info: 96 165 250;
+
+  /* one hue per agent; identity follows the agent, never its rank */
+  --a-supervisor: 251 191 36;
+  --a-planner: 167 139 250;
+  --a-researcher: 96 165 250;
+  --a-analyst: 45 212 191;
+  --a-executor: 251 146 60;
+  --a-writer: 244 114 182;
+  --a-reviewer: 163 230 53;
+  color-scheme: dark;
+}
+
+[data-theme='light'] {
+  --bg: 244 245 247;
+  --surface: 255 255 255;
+  --raised: 240 241 244;
+  --line: 224 227 233;
+  --line-strong: 190 195 205;
+  --fg: 20 23 30;
+  --muted: 93 100 114;
+  --faint: 138 145 158;
+  --accent: 132 204 22;
+  --accent-ink: 17 20 8;
+  --accent-text: 63 98 18;
+  --ok: 22 133 70;
+  --warn: 180 112 6;
+  --bad: 205 50 50;
+  --info: 37 99 220;
+
+  --a-supervisor: 180 112 6;
+  --a-planner: 109 74 220;
+  --a-researcher: 37 99 220;
+  --a-analyst: 13 148 136;
+  --a-executor: 210 90 8;
+  --a-writer: 205 40 110;
+  --a-reviewer: 77 124 15;
+  color-scheme: light;
+}
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  body {
+    @apply bg-bg text-fg font-sans text-[13.5px] leading-relaxed;
+    font-feature-settings: 'cv11', 'ss01';
+  }
+  ::selection {
+    background: rgb(var(--accent) / 0.35);
+  }
+  :focus-visible {
+    outline: 2px solid rgb(var(--accent-text));
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+  button {
+    cursor: pointer;
+  }
+  button:disabled {
+    cursor: not-allowed;
+  }
+  /* slim scrollbars */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: rgb(var(--line-strong)) transparent;
+  }
+}
+
+@layer components {
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+  .grid-bg {
+    background-image: radial-gradient(rgb(var(--line-strong) / 0.55) 1px, transparent 1px);
+    background-size: 22px 22px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
