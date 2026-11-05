@@ -447,8 +447,4 @@ Treat the first run on your machine as the real test, and open an issue for anyt
 
 ## License and author
 MIT
-Built by Aryan Raj.
-
-Add a `LICENSE` file before publishing (MIT is a common choice for portfolio projects).
-
 Built by **Aryan Raj**.
